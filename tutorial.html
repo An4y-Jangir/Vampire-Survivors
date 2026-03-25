@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Void Survivor</title>
+    <style>
+        /* --- CSS STYLING --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            /* Deep void background */
+        }
+
+        #tutorial-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(10, 10, 15, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            font-family: 'Courier New', Courier, monospace;
+            color: #fff;
+        }
+
+        .tutorial-content {
+            background: #111;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px #0ff;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .neon-text {
+            color: #fff;
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0ff, 0 0 40px #0ff;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            text-align: left;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #f0f;
+            text-shadow: 0 0 5px #f0f;
+            margin-top: 20px;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        #start-btn {
+            background-color: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #start-btn:hover {
+            background-color: #0ff;
+            color: #000;
+            box-shadow: 0 0 20px #0ff;
+        }
+
+        /* Small UI text to show it's working */
+        #game-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            z-index: 10;
+            display: none;
+            /* Hidden until game starts */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="tutorial-screen">
+        <div class="tutorial-content">
+            <h1 class="neon-text">NEON VOID SURVIVOR</h1>
+
+            <div class="instructions">
+                <h3>🎮 Controls</h3>
+                <ul>
+                    <li><strong>W, A, S, D:</strong> Move your ship</li>
+                    <li><strong>Left Click (Anywhere):</strong> Fire at the Brute</li>
+                </ul>
+
+                <h3>👾 Enemies</h3>
+                <ul>
+                    <li><strong>The Brute:</strong> Large and deals massive damage. Takes 4 hits. Watch its color
+                        change!</li>
+                </ul>
+            </div>
+
+            <button id="start-btn">INITIALIZE</button>
+        </div>
+    </div>
+
+    <div id="game-ui">Click anywhere to damage the Brute!</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // 1. UI Setup & Game State
+        const tutorialScreen = document.getElementById('tutorial-screen');
+        const startBtn = document.getElementById('start-btn');
+        const gameUI = document.getElementById('game-ui');
+        let gameStarted = false;
+
+        startBtn.addEventListener('click', () => {
+            tutorialScreen.style.display = 'none';
+            gameUI.style.display = 'block';
+            gameStarted = true;
+        });
+
+        // 2. Three.js Basic Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // Camera position
+        camera.position.z = 10;
+
+        // 3. Brute Logic & Colors
+        const bruteColors = {
+            4: 0x8b0000, // Dark Red (Full Health)
+            3: 0xff0000, // Bright Red (3 HP)
+            2: 0xff8800, // Orange (2 HP)
+            1: 0xffff00  // Yellow (1 HP)
+        };
+
+        // Create the Brute
+        const bruteGeometry = new THREE.BoxGeometry(2, 2, 2);
+        const bruteMaterial = new THREE.MeshPhongMaterial({ color: bruteColors[4] });
+        const brute = new THREE.Mesh(bruteGeometry, bruteMaterial);
+        brute.hp = 4; // Initialize with 4 HP
+        scene.add(brute);
+
+        // 4. Simulate a Collision/Hit
+        // For this demo, clicking the screen simulates a projectile hitting the brute
+        window.addEventListener('mousedown', () => {
+            if (!gameStarted) return; // Don't allow shooting during tutorial
+
+            if (brute.hp > 0) {
+                brute.hp -= 1; // Deduct health
+                console.log("Brute Hit! HP remaining:", brute.hp);
+
+                if (brute.hp > 0) {
+                    // Flash White
+                    brute.material.color.setHex(0xffffff);
+
+                    // Revert to the new damage-state color after 100ms
+                    setTimeout(() => {
+                        if (brute && brute.material) {
+                            brute.material.color.setHex(bruteColors[brute.hp]);
+                        }
+                    }, 100);
+                } else {
+                    // Brute dies
+                    console.log("Brute Defeated!");
+                    scene.remove(brute);
+                    gameUI.innerText = "BRUTE DESTROYED. SURVIVAL SECURED.";
+                    gameUI.style.color = "#0ff";
+                }
+            }
+        });
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        // 5. Main Game Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Only run game logic if the tutorial is dismissed
+            if (gameStarted) {
+                // Slowly rotate the Brute just so it looks alive
+                if (brute.hp > 0) {
+                    brute.rotation.x += 0.01;
+                    brute.rotation.y += 0.01;
+                }
+            }
+
+            // Always render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Start the loop
+        animate();
+    </script>
+</body>
+
+</html>

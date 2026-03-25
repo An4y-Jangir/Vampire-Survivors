@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Neon Void Survivor</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .bar-box {
+            width: 300px;
+            height: 15px;
+            border: 2px solid;
+            margin-bottom: 8px;
+            background: rgba(0, 255, 255, 0.1);
+            position: relative;
+            box-shadow: 0 0 10px;
+        }
+
+        .bar-lbl {
+            position: absolute;
+            left: 5px;
+            top: -2px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .fill {
+            height: 100%;
+            transition: width 0.2s;
+        }
+
+        #hp-fill {
+            background: #f0f;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        #xp-fill {
+            background: #0ff;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        #wave-fill {
+            background: #ff0;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        #stats {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        #ammo-ui {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            margin-top: 15px;
+        }
+
+        #reload-box {
+            display: none;
+            height: 10px;
+            width: 150px;
+            border: 2px solid #ff0;
+            margin-top: 5px;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        #reload-fill {
+            width: 0%;
+            height: 100%;
+            background: #ff0;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        #wep-ui {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #aaa;
+            text-shadow: none;
+            line-height: 1.5;
+        }
+
+        .act-wep {
+            color: #fff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #0ff;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .chg {
+            font-size: 14px;
+        }
+
+        #msg {
+            display: none;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+            text-align: center;
+            font-weight: bold;
+            z-index: 15;
+        }
+
+        #over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: #f00;
+            text-shadow: 0 0 20px #f00, 0 0 40px #f00;
+            text-align: center;
+            pointer-events: auto;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border: 2px solid #f00;
+            border-radius: 10px;
+        }
+
+        #boss {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            text-align: center;
+            z-index: 15;
+        }
+
+        #b-name {
+            color: #f0f;
+            text-shadow: 0 0 15px #f0f;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        #b-box {
+            width: 100%;
+            height: 25px;
+            border: 3px solid #f0f;
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        #b-fill {
+            width: 100%;
+            height: 100%;
+            background: #f0f;
+            transition: width 0.1s;
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        #notif {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+</head>
+
+<body>
+    <div id="ui">
+        <div id="stats"></div>
+        <div class="bar-box" style="border-color:#f0f;">
+            <div id="hp-fill" class="fill"></div><span class="bar-lbl">HP</span>
+        </div>
+        <div class="bar-box" style="border-color:#0ff;">
+            <div id="xp-fill" class="fill"></div><span class="bar-lbl">XP (UPGRADES)</span>
+        </div>
+        <div class="bar-box" style="border-color:#ff0;">
+            <div id="wave-fill" class="fill"></div><span class="bar-lbl">WAVE PROGRESS</span>
+        </div>
+        <div id="ammo-ui">AMMO: <span id="a-cur">10</span> / <span id="a-max">10</span></div>
+        <div id="reload-box">
+            <div id="reload-fill"></div>
+        </div>
+        <div id="wep-ui">
+            <div id="w-0" class="act-wep">[1] PISTOL</div>
+            <div id="w-1">[2] SHOTGUN</div>
+            <div id="w-2">[3] RAILGUN</div>
+            <div id="w-3">[4] MINIGUN <span id="mg-chg" class="chg"></span></div>
+        </div>
+    </div>
+    <div id="msg"></div>
+    <div id="boss">
+        <div id="b-name">WARNING: THE OVERSEER</div>
+        <div id="b-box">
+            <div id="b-fill"></div>
+        </div>
+    </div>
+    <div id="notif"></div>
+    <div id="over" onclick="location.reload()">SYSTEM FAILURE<br><span
+            style="font-size:20px;color:#fff;text-shadow:none;">Click Reboot</span></div>
+
+    <script>
+        const scn = new THREE.Scene(); scn.fog = new THREE.FogExp2(0x000510, 0.015);
+        const cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const ren = new THREE.WebGLRenderer({ antialias: true }); ren.setSize(window.innerWidth, window.innerHeight);
+        ren.shadowMap.enabled = true; ren.shadowMap.type = THREE.PCFSoftShadowMap; ren.toneMapping = THREE.ReinhardToneMapping; ren.toneMappingExposure = 1.5; document.body.appendChild(ren.domElement);
+        const comp = new THREE.EffectComposer(ren); comp.addPass(new THREE.RenderPass(scn, cam));
+        const bloom = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.4, 0.1); bloom.strength = 1.8; comp.addPass(bloom);
+        const grid = new THREE.GridHelper(2000, 200, 0x00ffff, 0x002233); grid.position.y = -1; scn.add(grid);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: 0x020205, roughness: 0.8 })); floor.rotation.x = -Math.PI / 2; floor.position.y = -1.1; floor.receiveShadow = true; scn.add(floor);
+        const dPos = new Float32Array(4500); for (let i = 0; i < 4500; i++) dPos[i] = (Math.random() - 0.5) * 400; const dGeo = new THREE.BufferGeometry(); dGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+        const dust = new THREE.Points(dGeo, new THREE.PointsMaterial({ color: 0x00ffff, size: 0.3, transparent: true, opacity: 0.4 })); scn.add(dust);
+        scn.add(new THREE.AmbientLight(0x404055, 3));
+        const p = new THREE.Mesh(new THREE.IcosahedronGeometry(0.8, 0), new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.5, flatShading: true })); p.castShadow = true; scn.add(p);
+        const pLight = new THREE.PointLight(0x00ffff, 3, 60); pLight.castShadow = true; pLight.shadow.bias = -0.001; p.add(pLight);
+
+        let st = {
+            hp: 100, xp: 0, lvl: 1, k: 0, g: 3, bul: [], e: [], part: [], pu: [], eBul: [], over: false, bAct: false, bDef: false, buff: { sh: 0, inf: 0 }, wv: 1, wQ: 15, wSp: 0, wBrk: false, mbSp: false, mgC: 0, mgP: 0,
+            w: [{ n: "PISTOL", a: 10, m: 10, d: 1, r: 1000, s: 1.5, c: 0xffff00, pl: 1, sp: 0 }, { n: "SHOTGUN", a: 4, m: 4, d: 1, r: 1500, s: 1.0, c: 0xff8800, pl: 5, sp: 0.15 }, { n: "RAILGUN", a: 3, m: 3, d: 15, r: 2000, s: 4.0, c: 0x00ffff, pl: 1, sp: 0 }, { n: "MINIGUN", a: 0, m: 100, d: 0.5, r: 999999, s: 2.5, c: 0x00ff00, pl: 1, sp: 0.1 }],
+            aW: 0, rl: false, rs: 0
+        };
+
+        const $ = (id) => document.getElementById(id);
+        function updHUD() {
+            let n = Date.now(), wep = st.w[st.aW];
+            $('stats').innerText = `KILLS: ${st.k} | WAVE: ${st.wv} | LVL: ${st.lvl} | GRENADES: ${st.g} [G]`;
+            $('stats').style.color = st.bAct ? "#f0f" : "#0ff"; $('stats').style.textShadow = st.bAct ? "0 0 10px #f0f" : "0 0 10px #0ff";
+            $('hp-fill').style.width = `${Math.max(0, st.hp)}%`; $('hp-fill').style.background = n < st.buff.sh ? "#00ffff" : "#f0f";
+            $('xp-fill').style.width = `${Math.min(100, (st.xp / (st.lvl * 100)) * 100)}%`; $('wave-fill').style.width = `${st.wQ === 0 ? 100 : Math.min(100, (st.wSp / st.wQ) * 100)}%`;
+            for (let i = 0; i < 4; i++) $(`w-${i}`).className = (i === st.aW) ? "act-wep" : "";
+            $('mg-chg').innerText = `(CHG: ${st.mgC} | ${st.mgP}/3)`; $('mg-chg').style.color = st.mgC > 0 ? "#0f0" : "#555";
+            if (!st.rl) { $('a-cur').innerText = n < st.buff.inf ? "∞" : wep.a; $('a-max').innerText = n < st.buff.inf ? "∞" : wep.m; $('a-cur').style.color = (wep.a === 0 && n > st.buff.inf) ? "#f00" : `#${wep.c.toString(16)}`; }
+            if (st.bAct) { let b = st.e.find(e => e.userData.t === 'b'); if (b) $('b-fill').style.width = `${(b.userData.hp / b.userData.mHp) * 100}%`; }
+        }
+        function notif(txt, c) { let n = $('notif'); n.innerHTML = txt; n.style.color = c; n.style.textShadow = `0 0 10px ${c}`; n.style.opacity = 1; setTimeout(() => n.style.opacity = 0, 2000); }
+        function exp(pos, c, cnt = 10) { for (let i = 0; i < cnt; i++) { let m = new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 1.5 }); let pt = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), m); pt.position.copy(pos); pt.userData = { v: new THREE.Vector3(Math.random() - 0.5, Math.random(), Math.random() - 0.5).multiplyScalar(0.4), l: 1.0 }; scn.add(pt); st.part.push(pt); } }
+        function lvlUp() { if (st.xp >= st.lvl * 100) { st.xp -= st.lvl * 100; st.lvl++; st.w.forEach((w, i) => { if (i !== 3) { w.m += 2; w.r = Math.max(300, w.r * 0.9); w.a = w.m; } }); st.hp = Math.min(100, st.hp + 50); st.g++; exp(p.position, 0x00ff00, 30); notif("SYSTEM UPGRADED<br>+MAG | -RELOAD", "#0f0"); updHUD(); } }
+        function brk() {
+            st.wBrk = true; st.mbSp = false; let c = 5; $('msg').style.display = 'block'; st.hp = Math.min(100, st.hp + 30); st.w.forEach(w => { if (w.n !== "MINIGUN") w.a = w.m; }); exp(p.position, 0x00ffff, 30); st.mgP++; if (st.mgP >= 3) { st.mgC++; st.mgP = 0; notif("MINIGUN READY [4]", "#0f0"); } updHUD();
+            let tmr = setInterval(() => { if (st.over) { clearInterval(tmr); return; } $('msg').innerHTML = `WAVE ${st.wv} CLEARED<br><span style="font-size:30px">NEXT IN ${c}...</span>`; c--; if (c < 0) { clearInterval(tmr); $('msg').style.display = 'none'; st.wv++; st.wSp = 0; st.wBrk = false; if (st.wv === 10 && !st.bDef) { st.wQ = 0; spB(); } else { st.wQ = st.wv * 15; } updHUD(); } }, 1000);
+        }
+        function fBul(tgt) {
+            let w = st.w[st.aW]; tgt.y = p.position.y; let bD = new THREE.Vector3().subVectors(tgt, p.position).normalize();
+            for (let i = 0; i < w.pl; i++) {
+                let isR = w.n === "RAILGUN", isM = w.n === "MINIGUN", bw = isR ? 0.4 : isM ? 0.1 : 0.15, bl = isR ? 10 : isM ? 1.5 : 2.5; let b = new THREE.Mesh(new THREE.BoxGeometry(bw, bw, bl), new THREE.MeshStandardMaterial({ color: w.c, emissive: w.c, emissiveIntensity: 2, wireframe: !isR })); b.position.copy(p.position);
+                let d = bD.clone(); if (w.sp > 0) d.applyAxisAngle(new THREE.Vector3(0, 1, 0), isM ? (Math.random() - 0.5) * w.sp : (i - (w.pl - 1) / 2) * w.sp); b.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), d); b.userData = { v: d.multiplyScalar(w.s), dmg: w.d, c: w.c }; if (isR) b.add(new THREE.PointLight(w.c, 1, 10)); scn.add(b); st.bul.push(b);
+            }
+        }
+        function gren() {
+            if (st.g <= 0 || st.over) return; st.g--; grid.material.color.setHex(0xffffff); setTimeout(() => grid.material.color.setHex(0x00ffff), 100); updHUD();
+            let blst = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9 })); blst.position.copy(p.position); scn.add(blst); let cR = 1;
+            let ivl = setInterval(() => {
+                if (st.over) { clearInterval(ivl); return; } cR += 1.5; blst.scale.set(cR, cR, cR); blst.material.opacity -= 0.1;
+                for (let i = st.e.length - 1; i >= 0; i--) {
+                    let e = st.e[i]; if (e && blst.position.distanceTo(e.position) <= cR) {
+                        if (e.userData.t === 'b' || e.userData.t === 'mb') {
+                            e.userData.hp -= 30; exp(e.position, e.userData.c, 10); grid.material.color.setHex(e.userData.c); setTimeout(() => grid.material.color.setHex(0x00ffff), 80);
+                            if (e.userData.hp <= 0) { if (e.userData.t === 'b') bDth(e, i); else { exp(e.position, e.userData.c, 25); scn.remove(e.userData.wr); scn.remove(e); st.e.splice(i, 1); st.k++; st.xp += 300; lvlUp(); updHUD(); } }
+                        } else { st.k++; exp(e.position, e.userData.c, 15); scn.remove(e); st.e.splice(i, 1); }
+                    }
+                }
+                if (cR >= 15) { clearInterval(ivl); scn.remove(blst); }
+            }, 30);
+        }
+        function bDth(m, idx) { st.k++; st.xp += 1000; lvlUp(); exp(m.position, m.userData.c, 50); scn.remove(m); st.e.splice(idx, 1); for (let f = 0; f < 3; f++) { setTimeout(() => grid.material.color.setHex(0xffffff), f * 100); setTimeout(() => grid.material.color.setHex(0xff00ff), f * 100 + 50); } setTimeout(() => grid.material.color.setHex(0x00ffff), 350); st.bAct = false; st.bDef = true; $('boss').style.display = 'none'; brk(); }
+        function spE() {
+            let a = Math.random() * Math.PI * 2, t = "n", s = 1.4, c = 0xff0066, hp = 1, sm = 1; if (st.wv >= 2 && Math.random() < 0.25) { t = "br"; s = 2.5; c = 0x880022; hp = 4; sm = 0.4; } if (st.wv >= 3 && Math.random() < 0.20) { t = "sk"; s = 1; c = 0x00ffcc; hp = 1; sm = 2.0; }
+            let e = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.2, roughness: 0.5 })); e.position.set(p.position.x + Math.cos(a) * 30, 0, p.position.z + Math.sin(a) * 30); e.userData = { hp, mHp: hp, sM: sm, t, s, c, oC: c }; e.castShadow = true; e.receiveShadow = true; scn.add(e); st.e.push(e);
+        }
+        function spMB() {
+            let wS = Math.floor(st.wv / 2), s = 2 + (wS * 0.3), c = 0xff0000, b = new THREE.Mesh(new THREE.OctahedronGeometry(s, 0), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 })); let wr = new THREE.Mesh(new THREE.OctahedronGeometry(s + 0.3, 0), new THREE.MeshBasicMaterial({ color: c, wireframe: true, transparent: true, opacity: 0.8 })); b.add(wr);
+            let a = Math.random() * Math.PI * 2; b.position.set(p.position.x + Math.cos(a) * 35, 2, p.position.z + Math.sin(a) * 35); let hp = 150 + (wS * 100); b.userData = { hp, mHp: hp, sM: 0.3, t: 'mb', s: s * 2, c, oC: c, lS: Date.now(), fR: Math.max(800, 2500 - (wS * 200)), wr }; b.castShadow = true; b.add(new THREE.PointLight(c, 2, 30)); scn.add(b); st.e.push(b); notif(`ARMED ENTITY DETECTED`, "#ff0000");
+        }
+        function spB() { st.bAct = true; $('boss').style.display = 'block'; let s = 3, c = 0xff00ff, b = new THREE.Mesh(new THREE.TorusKnotGeometry(s, 1, 100, 16), new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.8 })); b.position.set(p.position.x, 2, p.position.z - 30); b.userData = { hp: 400, mHp: 400, sM: 0.35, t: 'b', s: s * 2, c, oC: c }; b.castShadow = true; b.add(new THREE.PointLight(c, 2, 40)); scn.add(b); st.e.push(b); updHUD(); }
+        function spPU(pos) { if (Math.random() > 0.1) return; let r = Math.random(), t = r < 0.33 ? 'hl' : (r < 0.66 ? 'am' : 'sh'), c = t === 'hl' ? 0x00ff00 : (t === 'am' ? 0xffff00 : 0x00ffff); let m = new THREE.Mesh(new THREE.OctahedronGeometry(0.5), new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 1.5, wireframe: true })); m.position.copy(pos); m.position.y = 0.5; m.userData = { t, c }; m.add(new THREE.PointLight(c, 1, 5)); scn.add(m); st.pu.push(m); }
+        function stRl() { st.rl = true; st.rs = Date.now(); $('reload-box').style.display = "block"; }
+        function swW(idx) { if (st.rl || idx === st.aW) return; if (idx === 3) { if (st.w[3].a > 0) st.aW = 3; else if (st.mgC > 0) { st.mgC--; st.w[3].a = 100; st.aW = 3; } else { notif("NO MINIGUN CHARGES", "#f00"); return; } } else st.aW = idx; updHUD(); if (st.w[st.aW].a <= 0 && Date.now() > st.buff.inf) stRl(); }
+
+        const k = {}; window.onkeydown = (e) => { k[e.code] = true; let n = Date.now(); if (!st.rl && !st.over) { if (e.code === 'Digit1') swW(0); if (e.code === 'Digit2') swW(1); if (e.code === 'Digit3') swW(2); if (e.code === 'Digit4') swW(3); } if (e.code === 'KeyR' && !st.rl && st.aW !== 3 && st.w[st.aW].a < st.w[st.aW].m && n > st.buff.inf) stRl(); if (e.code === 'KeyG') gren(); }; window.onkeyup = (e) => k[e.code] = false;
+        const rc = new THREE.Raycaster(), ms = new THREE.Vector2(), gPl = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), iPt = new THREE.Vector3(); let pDn = false, lF = 0;
+        window.onpointerdown = () => pDn = true; window.onpointerup = () => pDn = false; window.onmousemove = (e) => { ms.x = (e.clientX / window.innerWidth) * 2 - 1; ms.y = -(e.clientY / window.innerHeight) * 2 + 1; }; window.onresize = () => { cam.aspect = window.innerWidth / window.innerHeight; cam.updateProjectionMatrix(); ren.setSize(window.innerWidth, window.innerHeight); comp.setSize(window.innerWidth, window.innerHeight); };
+
+        function upd() {
+            if (st.over) return; let n = Date.now();
+            if (k['KeyW']) p.position.z -= 0.15; if (k['KeyS']) p.position.z += 0.15; if (k['KeyA']) p.position.x -= 0.15; if (k['KeyD']) p.position.x += 0.15;
+            if (pDn) { let w = st.w[st.aW], fd = w.n === "MINIGUN" ? 80 : 250; if (n - lF > fd && !st.rl && (w.a > 0 || n < st.buff.inf)) { rc.setFromCamera(ms, cam); if (rc.ray.intersectPlane(gPl, iPt)) { fBul(iPt); if (n > st.buff.inf) { w.a--; if (w.a <= 0) { if (st.aW === 3) swW(0); else stRl(); } } updHUD(); lF = n; if (w.n !== "MINIGUN") pDn = false; } } } dust.rotation.y += 0.0005;
+            let w = st.w[st.aW]; if (st.rl) { let el = n - st.rs; $('reload-fill').style.width = `${(el / w.r) * 100}%`; $('a-cur').innerText = `RLD ${Math.max(0, ((w.r - el) / 1000).toFixed(1))}s`; if (el >= w.r) { st.rl = false; w.a = w.m; $('reload-box').style.display = "none"; updHUD(); } }
+            st.part.forEach((pt, i) => { pt.position.add(pt.userData.v); pt.userData.l -= 0.05; pt.scale.multiplyScalar(0.9); if (pt.userData.l <= 0) { scn.remove(pt); st.part.splice(i, 1); } });
+            st.bul.forEach((b, i) => { b.position.add(b.userData.v); if (b.position.distanceTo(p.position) > 100) { scn.remove(b); st.bul.splice(i, 1); } });
+            st.eBul.forEach((b, i) => { b.position.add(b.userData.v); if (b.position.distanceTo(p.position) < 1.2) { if (n < st.buff.sh) { grid.material.color.setHex(0xffffff); setTimeout(() => grid.material.color.setHex(0x00ffff), 50); } else { st.hp -= b.userData.dmg; grid.material.color.setHex(0xff0000); setTimeout(() => grid.material.color.setHex(0x00ffff), 100); } exp(p.position, 0xff0000, 5); scn.remove(b); st.eBul.splice(i, 1); updHUD(); if (st.hp <= 0 && !st.over) { st.over = true; $('over').style.display = "block"; $('boss').style.display = 'none'; scn.remove(p); exp(p.position, 0x00ffcc, 50); } } else if (b.position.distanceTo(p.position) > 150) { scn.remove(b); st.eBul.splice(i, 1); } });
+            st.pu.forEach((pu, i) => { pu.rotation.y += 0.03; pu.position.y = 0.5 + Math.sin(n * 0.005) * 0.1; let d = p.position.distanceTo(pu.position); if (d < 6.0) pu.position.lerp(p.position, 0.1); if (d < 1.5) { let t = pu.userData.t; if (t === 'hl') { st.hp = Math.min(100, st.hp + 20); notif("HP RECOVERED", "#0f0"); } else if (t === 'sh') { st.buff.sh = n + 10000; notif("SHIELD ACTIVE", "#0ff"); } else if (t === 'am') { st.buff.inf = n + 10000; if (st.rl) { st.rl = false; $('reload-box').style.display = "none"; } notif("∞ AMMO", "#ff0"); } scn.remove(pu); st.pu.splice(i, 1); updHUD(); } });
+            st.e.forEach((e, ei) => {
+                let dr = new THREE.Vector3().subVectors(p.position, e.position).normalize(); let bs = 0.03 + (st.wv * 0.002); if (st.bAct) bs *= e.userData.sM; e.position.add(dr.multiplyScalar(bs * e.userData.sM));
+                if (e.userData.t === 'b') { e.rotation.x += 0.02; e.rotation.y += 0.03; } else if (e.userData.t === 'mb') { e.rotation.x += 0.01; e.rotation.y += 0.02; e.userData.wr.rotation.x -= 0.02; e.userData.wr.rotation.y -= 0.03; if (n - e.userData.lS > e.userData.fR) { let bb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 2), new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 3 })); bb.position.copy(e.position); bb.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dr); bb.userData = { v: dr.multiplyScalar(0.5), dmg: 10 + (st.wv * 2) }; scn.add(bb); st.eBul.push(bb); e.userData.lS = n; } } else e.rotation.y += 0.05;
+                if (p.position.distanceTo(e.position) < (0.8 + e.userData.s / 2)) { if (n < st.buff.sh) { exp(e.position, 0x00ffff, 3); grid.material.color.setHex(0xffffff); setTimeout(() => grid.material.color.setHex(0x00ffff), 50); } else { st.hp -= (e.userData.t === "br" ? 30 : 15); grid.material.color.setHex(0xff0000); setTimeout(() => grid.material.color.setHex(0x00ffff), 100); } exp(e.position, 0xffffff); if (e.userData.wr) scn.remove(e.userData.wr); scn.remove(e); st.e.splice(ei, 1); updHUD(); if (st.hp <= 0 && !st.over) { st.over = true; $('over').style.display = "block"; $('boss').style.display = 'none'; scn.remove(p); exp(p.position, 0x00ffcc, 50); } }
+                st.bul.forEach((b, bi) => {
+                    if (b && e && b.position.distanceTo(e.position) < (0.2 + e.userData.s / 2)) {
+                        e.userData.hp -= b.userData.dmg; e.position.add(b.userData.v.clone().normalize().multiplyScalar(0.5)); exp(e.position, b.userData.c, 3); scn.remove(b); st.bul.splice(bi, 1);
+                        if (e.userData.t === 'b') { updHUD(); grid.material.color.setHex(0xff00ff); setTimeout(() => grid.material.color.setHex(0x00ffff), 80); }
+                        if (e.userData.hp <= 0) { if (e.userData.t === 'b') handleBossDeath(e, ei); else { exp(e.position, e.userData.c, 15); spPU(e.position); if (e.userData.wr) scn.remove(e.userData.wr); scn.remove(e); st.e.splice(ei, 1); st.k++; st.xp += (e.userData.t === "br" ? 150 : e.userData.t === "sk" ? 50 : e.userData.t === "mb" ? 400 : 30); lvlUp(); updHUD(); } }
+                        else if (e.userData.t !== 'b' && e.userData.t !== 'mb') { let dp = 1 - (e.userData.hp / e.userData.mHp); e.material.color.setHex(e.userData.oC).lerp(new THREE.Color(0xffffff), dp); e.material.emissive.setHex(e.userData.oC).lerp(new THREE.Color(0xffffff), dp); }
+                    }
+                });
+            });
+            if (!st.wBrk && !st.bAct) { if (st.wv % 2 === 0 && st.wv !== 10 && !st.mbSp) { spMB(); st.mbSp = true; } if (st.wSp < st.wQ) { if (Math.random() < Math.min(0.02 + (st.wv * 0.003), 0.15)) { spE(); st.wSp++; updHUD(); } } else if (st.e.length === 0) brk(); }
+            cam.position.lerp(new THREE.Vector3(p.position.x, 15, p.position.z + 15), 0.1); cam.lookAt(p.position);
+        }
+        function anim() { requestAnimationFrame(animate); upd(); comp.render(); } updHUD(); anim();
+    </script>
+</body>
+
+</html>
