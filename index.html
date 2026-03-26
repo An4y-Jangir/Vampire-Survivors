@@ -1,42 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Neon Void Survivor - Complete</title>
+    <title>Neon Void Survivor - Dash & UI Update</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', Courier, monospace; user-select: none; }
-        
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; color: #0ff; text-shadow: 0 0 10px #0ff; padding: 20px; box-sizing: border-box; z-index: 10; }
-        
-        .bar-container { width: 300px; height: 15px; border: 2px solid #0ff; margin-bottom: 8px; background: rgba(0, 255, 255, 0.1); box-shadow: 0 0 10px #0ff; position: relative; }
-        .bar-label { position: absolute; left: 5px; top: -2px; font-size: 12px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
-        
-        #hp-bar { width: 100%; height: 100%; background: #f0f; transition: width 0.2s; box-shadow: 0 0 10px #f0f; }
-        #xp-bar { width: 0%; height: 100%; background: #0ff; transition: width 0.2s; box-shadow: 0 0 10px #0ff; }
-        #wave-bar { width: 0%; height: 100%; background: #ff0; transition: width 0.2s; box-shadow: 0 0 10px #ff0; }
-        
-        #stats { font-size: 24px; font-weight: bold; margin-bottom: 10px; transition: color 0.3s; }
-        #ammo-ui { font-size: 24px; font-weight: bold; color: #ff0; text-shadow: 0 0 10px #ff0; margin-top: 15px; }
-        
-        #reload-container { display: none; height: 10px; width: 150px; border: 2px solid #ff0; margin-top: 5px; box-shadow: 0 0 10px #ff0; }
-        #reload-bar { width: 0%; height: 100%; background: #ff0; box-shadow: 0 0 10px #ff0; }
-        
-        #weapon-ui { margin-top: 20px; font-size: 18px; color: #aaa; text-shadow: none; line-height: 1.5; }
-        .active-wep { color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #0ff; font-weight: bold; font-size: 20px; }
-        .charge-text { color: #0f0; font-size: 14px; }
-        
-        #wave-announcer { display: none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; color: #fff; text-shadow: 0 0 20px #0ff, 0 0 40px #0ff; text-align: center; font-weight: bold; z-index: 15; }
+        /* --- UI STYLING --- */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+        }
 
-        #game-over { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; color: #f00; text-shadow: 0 0 20px #f00, 0 0 40px #f00; text-align: center; pointer-events: auto; cursor: pointer; font-weight: bold; z-index: 20; background: rgba(0,0,0,0.8); padding: 40px; border: 2px solid #f00; border-radius: 10px; }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
 
-        #boss-hud { display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 60%; text-align: center; z-index: 15; }
-        #boss-name { color: #f0f; text-shadow: 0 0 15px #f0f; font-size: 30px; font-weight: bold; margin-bottom: 5px; }
-        #boss-hp-container { width: 100%; height: 25px; border: 3px solid #f0f; background: rgba(255, 0, 255, 0.1); box-shadow: 0 0 15px #f0f; }
-        #boss-hp-bar { width: 100%; height: 100%; background: #f0f; transition: width 0.1s; box-shadow: 0 0 15px #f0f; }
+        .bar-container {
+            width: 300px;
+            height: 15px;
+            border: 2px solid #0ff;
+            margin-bottom: 8px;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 10px #0ff;
+            position: relative;
+        }
 
-        #buff-notif { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 24px; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.3s; z-index: 10; pointer-events: none;}
+        .bar-label {
+            position: absolute;
+            left: 5px;
+            top: -2px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #hp-bar {
+            width: 100%;
+            height: 100%;
+            background: #f0f;
+            transition: width 0.2s;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        #xp-bar {
+            width: 0%;
+            height: 100%;
+            background: #0ff;
+            transition: width 0.2s;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        #wave-bar {
+            width: 0%;
+            height: 100%;
+            background: #ff0;
+            transition: width 0.2s;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        /* NEW: Dash Cooldown Bar */
+        #dash-container {
+            width: 150px;
+            height: 10px;
+            border: 2px solid #0f0;
+            margin-bottom: 10px;
+            box-shadow: 0 0 10px #0f0;
+            position: relative;
+        }
+
+        #dash-bar {
+            width: 100%;
+            height: 100%;
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        /* NEW: Power-up Timers */
+        #buff-timers {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 8px #fff;
+            line-height: 1.4;
+        }
+
+        #stats {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        #ammo-ui {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+            margin-top: 15px;
+        }
+
+        #reload-container {
+            display: none;
+            height: 10px;
+            width: 150px;
+            border: 2px solid #ff0;
+            margin-top: 5px;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        #reload-bar {
+            width: 0%;
+            height: 100%;
+            background: #ff0;
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        #weapon-ui {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #aaa;
+            text-shadow: none;
+            line-height: 1.5;
+        }
+
+        .active-wep {
+            color: #fff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #0ff;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .charge-text {
+            color: #0f0;
+            font-size: 14px;
+        }
+
+        #wave-announcer {
+            display: none;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+            text-align: center;
+            font-weight: bold;
+            z-index: 15;
+        }
+
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: #f00;
+            text-shadow: 0 0 20px #f00, 0 0 40px #f00;
+            text-align: center;
+            pointer-events: auto;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border: 2px solid #f00;
+            border-radius: 10px;
+        }
+
+        /* Main Boss HUD */
+        #boss-hud {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            text-align: center;
+            z-index: 15;
+        }
+
+        #boss-name {
+            color: #f0f;
+            text-shadow: 0 0 15px #f0f;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        #boss-hp-container {
+            width: 100%;
+            height: 25px;
+            border: 3px solid #f0f;
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        #boss-hp-bar {
+            width: 100%;
+            height: 100%;
+            background: #f0f;
+            transition: width 0.1s;
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        /* NEW: Mini-Boss HUD */
+        #mboss-hud {
+            display: none;
+            position: absolute;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            text-align: center;
+            z-index: 14;
+        }
+
+        #mboss-name {
+            color: #f00;
+            text-shadow: 0 0 15px #f00;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        #mboss-hp-container {
+            width: 100%;
+            height: 15px;
+            border: 2px solid #f00;
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 10px #f00;
+        }
+
+        #mboss-hp-bar {
+            width: 100%;
+            height: 100%;
+            background: #f00;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        #buff-notif {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+            pointer-events: none;
+        }
     </style>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
@@ -49,13 +284,27 @@
 <body>
     <div id="ui-layer">
         <div id="stats">KILLS: 0 | WAVE: 1 | LVL: 1 | GRENADES: 3 [G]</div>
-        
-        <div class="bar-container" style="border-color:#f0f;"><div id="hp-bar"></div><span class="bar-label">HP</span></div>
-        <div class="bar-container" style="border-color:#0ff;"><div id="xp-bar"></div><span class="bar-label">XP (UPGRADES)</span></div> 
-        <div class="bar-container" style="border-color:#ff0;"><div id="wave-bar"></div><span class="bar-label">WAVE PROGRESS</span></div>
+
+        <div id="dash-container">
+            <div id="dash-bar"></div><span class="bar-label">DASH [SPACE]</span>
+        </div>
+
+        <div class="bar-container" style="border-color:#f0f;">
+            <div id="hp-bar"></div><span class="bar-label">HP</span>
+        </div>
+        <div class="bar-container" style="border-color:#0ff;">
+            <div id="xp-bar"></div><span class="bar-label">XP (UPGRADES)</span>
+        </div>
+        <div class="bar-container" style="border-color:#ff0;">
+            <div id="wave-bar"></div><span class="bar-label">WAVE PROGRESS</span>
+        </div>
+
+        <div id="buff-timers"></div>
 
         <div id="ammo-ui">AMMO: <span id="ammo-count">10</span> / <span id="ammo-max">10</span></div>
-        <div id="reload-container"><div id="reload-bar"></div></div>
+        <div id="reload-container">
+            <div id="reload-bar"></div>
+        </div>
 
         <div id="weapon-ui">
             <div id="wep-0" class="active-wep">[1] PISTOL</div>
@@ -69,60 +318,64 @@
 
     <div id="boss-hud">
         <div id="boss-name">WARNING: THE OVERSEER</div>
-        <div id="boss-hp-container"><div id="boss-hp-bar"></div></div>
+        <div id="boss-hp-container">
+            <div id="boss-hp-bar"></div>
+        </div>
+    </div>
+
+    <div id="mboss-hud">
+        <div id="mboss-name">ARMED MONOLITH</div>
+        <div id="mboss-hp-container">
+            <div id="mboss-hp-bar"></div>
+        </div>
     </div>
 
     <div id="buff-notif">BUFF ACQUIRED</div>
-
-    <div id="game-over" onclick="location.reload()">SYSTEM FAILURE<br><span style="font-size: 20px; color: #fff; text-shadow: none;">Click to Reboot</span></div>
+    <div id="game-over" onclick="location.reload()">SYSTEM FAILURE<br><span
+            style="font-size: 20px; color: #fff; text-shadow: none;">Click to Reboot</span></div>
 
     <script>
+        // --- 1. SCENE & GRAPHICS SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000510, 0.015); 
-        
+        scene.fog = new THREE.FogExp2(0x000510, 0.015);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        
+
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; 
+        renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ReinhardToneMapping;
-        renderer.toneMappingExposure = 1.5; 
+        renderer.toneMappingExposure = 1.5;
         document.body.appendChild(renderer.domElement);
 
         const renderScene = new THREE.RenderPass(scene, camera);
-        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.4, 0.1); 
-        bloomPass.strength = 1.8; 
-        
+        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 0.4, 0.1);
+        bloomPass.strength = 1.8;
+
         const composer = new THREE.EffectComposer(renderer);
         composer.addPass(renderScene);
         composer.addPass(bloomPass);
 
         const gridHelper = new THREE.GridHelper(2000, 200, 0x00ffff, 0x002233);
-        gridHelper.position.y = -1; 
+        gridHelper.position.y = -1;
         scene.add(gridHelper);
 
-        const floorGeo = new THREE.PlaneGeometry(2000, 2000);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x020205, roughness: 0.8 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -1.1; 
-        floor.receiveShadow = true;
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: 0x020205, roughness: 0.8 }));
+        floor.rotation.x = -Math.PI / 2; floor.position.y = -1.1; floor.receiveShadow = true;
         scene.add(floor);
 
         const dustGeo = new THREE.BufferGeometry();
         const dustPos = new Float32Array(1500 * 3);
-        for(let i=0; i < 4500; i++) dustPos[i] = (Math.random() - 0.5) * 400;
+        for (let i = 0; i < 4500; i++) dustPos[i] = (Math.random() - 0.5) * 400;
         dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-        const dustMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.3, transparent: true, opacity: 0.4 });
-        const dust = new THREE.Points(dustGeo, dustMat);
+        const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0x00ffff, size: 0.3, transparent: true, opacity: 0.4 }));
         scene.add(dust);
 
-        const gridFlashColor = new THREE.Color(0xffffff); 
-        const gridBaseColor = new THREE.Color(0x00ffff); 
+        const gridFlashColor = new THREE.Color(0xffffff);
+        const gridBaseColor = new THREE.Color(0x00ffff);
 
-        scene.add(new THREE.AmbientLight(0x404055, 3)); 
-        
+        scene.add(new THREE.AmbientLight(0x404055, 3));
+
         const player = new THREE.Mesh(
             new THREE.IcosahedronGeometry(0.8, 0),
             new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 0.5, flatShading: true })
@@ -130,22 +383,24 @@
         player.castShadow = true;
         scene.add(player);
 
-        const playerLight = new THREE.PointLight(0x00ffff, 3, 60); 
-        playerLight.castShadow = true;
-        playerLight.shadow.bias = -0.001;
+        const playerLight = new THREE.PointLight(0x00ffff, 3, 60);
+        playerLight.castShadow = true; playerLight.shadow.bias = -0.001;
         player.add(playerLight);
 
+        // --- 2. GAME STATE ---
         let gameState = {
             hp: 100, xp: 0, lvl: 1, kills: 0, grenades: 3,
-            bullets: [], enemies: [], particles: [], powerups: [], 
-            enemyBullets: [], 
+            bullets: [], enemies: [], particles: [], powerups: [], enemyBullets: [],
             gameOver: false, bossActive: false, bossDefeated: false,
-            buffs: { shield: 0, infiniteAmmo: 0 }, 
-            
-            wave: 1, waveQuota: 15, waveSpawned: 0, waveBreak: false,
-            miniBossSpawnedThisWave: false, 
-            
-            minigunCharges: 0, minigunProgress: 0, 
+            buffs: { shield: 0, infiniteAmmo: 0 },
+
+            // Dash Variables
+            lastDash: 0,
+            dashCooldown: 2000, // 2 seconds
+            dashVel: new THREE.Vector3(0, 0, 0),
+
+            wave: 1, waveQuota: 15, waveSpawned: 0, waveBreak: false, miniBossSpawnedThisWave: false,
+            minigunCharges: 0, minigunProgress: 0,
 
             weapons: [
                 { name: "PISTOL", ammo: 10, mag: 10, dmg: 1, reload: 1000, speed: 1.5, color: 0xffff00, pellets: 1, spread: 0 },
@@ -156,18 +411,16 @@
             activeWep: 0, isReloading: false, reloadStart: 0
         };
 
+        // --- 3. UI AND LOGIC FUNCTIONS ---
         function updateHUD() {
             const now = Date.now();
-            const statsEl = document.getElementById('stats');
-            
-            statsEl.innerText = `KILLS: ${gameState.kills} | WAVE: ${gameState.wave} | LVL: ${gameState.lvl} | GRENADES: ${gameState.grenades} [G]`;
-            
-            if (gameState.bossActive) {
-                statsEl.style.color = "#f0f"; statsEl.style.textShadow = "0 0 10px #f0f"; 
-            } else {
-                statsEl.style.color = "#0ff"; statsEl.style.textShadow = "0 0 10px #0ff";
-            }
 
+            // Basic Stats
+            document.getElementById('stats').innerText = `KILLS: ${gameState.kills} | WAVE: ${gameState.wave} | LVL: ${gameState.lvl} | GRENADES: ${gameState.grenades} [G]`;
+            document.getElementById('stats').style.color = gameState.bossActive ? "#f0f" : "#0ff";
+            document.getElementById('stats').style.textShadow = gameState.bossActive ? "0 0 10px #f0f" : "0 0 10px #0ff";
+
+            // HP Bar
             document.getElementById('hp-bar').style.width = `${Math.max(0, gameState.hp)}%`;
             if (now < gameState.buffs.shield) {
                 document.getElementById('hp-bar').style.background = "#00ffff";
@@ -177,111 +430,100 @@
                 document.getElementById('hp-bar').style.boxShadow = "0 0 10px #f0f";
             }
 
+            // Dash Cooldown Bar
+            let dashPct = Math.min(100, ((now - gameState.lastDash) / gameState.dashCooldown) * 100);
+            document.getElementById('dash-bar').style.width = `${dashPct}%`;
+            document.getElementById('dash-bar').style.background = dashPct >= 100 ? "#0f0" : "#555";
+            document.getElementById('dash-container').style.borderColor = dashPct >= 100 ? "#0f0" : "#555";
+            document.getElementById('dash-container').style.boxShadow = dashPct >= 100 ? "0 0 10px #0f0" : "none";
+
+            // Active Buff Timers
+            let buffHTML = "";
+            let shieldLeft = (gameState.buffs.shield - now) / 1000;
+            if (shieldLeft > 0) buffHTML += `<span style="color:#00ffff">SHIELD: ${shieldLeft.toFixed(1)}s</span><br>`;
+
+            let ammoLeft = (gameState.buffs.infiniteAmmo - now) / 1000;
+            if (ammoLeft > 0) buffHTML += `<span style="color:#ffff00">OVERCLOCK: ${ammoLeft.toFixed(1)}s</span><br>`;
+
+            document.getElementById('buff-timers').innerHTML = buffHTML;
+
+            // Progression Bars
             document.getElementById('xp-bar').style.width = `${Math.min(100, (gameState.xp / (gameState.lvl * 100)) * 100)}%`;
+            document.getElementById('wave-bar').style.width = `${gameState.waveQuota === 0 ? 100 : Math.min(100, (gameState.waveSpawned / gameState.waveQuota) * 100)}%`;
 
-            const progress = (gameState.waveSpawned / gameState.waveQuota) * 100;
-            document.getElementById('wave-bar').style.width = `${gameState.waveQuota === 0 ? 100 : Math.min(100, progress)}%`;
-
+            // Weapons
             const wep = gameState.weapons[gameState.activeWep];
             for (let i = 0; i < 4; i++) document.getElementById(`wep-${i}`).className = (i === gameState.activeWep) ? "active-wep" : "";
-            
+
             document.getElementById('mg-charges').innerText = `(CHG: ${gameState.minigunCharges} | ${gameState.minigunProgress}/3)`;
-            if (gameState.minigunCharges > 0) document.getElementById('mg-charges').style.color = "#0f0";
-            else document.getElementById('mg-charges').style.color = "#555";
+            document.getElementById('mg-charges').style.color = gameState.minigunCharges > 0 ? "#0f0" : "#555";
 
             if (!gameState.isReloading) {
                 if (now < gameState.buffs.infiniteAmmo) {
-                    document.getElementById('ammo-count').innerText = "∞";
-                    document.getElementById('ammo-max').innerText = "∞";
+                    document.getElementById('ammo-count').innerText = "∞"; document.getElementById('ammo-max').innerText = "∞";
                     document.getElementById('ammo-count').style.color = wep.color.toString(16).replace('0x', '#');
                 } else {
-                    document.getElementById('ammo-count').innerText = wep.ammo;
-                    document.getElementById('ammo-max').innerText = wep.mag;
+                    document.getElementById('ammo-count').innerText = wep.ammo; document.getElementById('ammo-max').innerText = wep.mag;
                     document.getElementById('ammo-count').style.color = wep.ammo === 0 ? "#f00" : wep.color.toString(16).replace('0x', '#');
                 }
             }
 
+            // Boss HUDs
             if (gameState.bossActive) {
                 const bossMesh = gameState.enemies.find(e => e.userData.type === 'boss');
-                if (bossMesh) {
-                    const bossHPPercent = (bossMesh.userData.hp / bossMesh.userData.maxHp) * 100;
-                    document.getElementById('boss-hp-bar').style.width = `${bossHPPercent}%`;
-                }
+                if (bossMesh) document.getElementById('boss-hp-bar').style.width = `${(bossMesh.userData.hp / bossMesh.userData.maxHp) * 100}%`;
+            }
+
+            // Mini-Boss HUD
+            const mbossMesh = gameState.enemies.find(e => e.userData.type === 'miniboss');
+            if (mbossMesh) {
+                document.getElementById('mboss-hud').style.display = 'block';
+                document.getElementById('mboss-hp-bar').style.width = `${(mbossMesh.userData.hp / mbossMesh.userData.maxHp) * 100}%`;
+            } else {
+                document.getElementById('mboss-hud').style.display = 'none';
             }
         }
 
         function showBuffNotification(text, color) {
             const notif = document.getElementById('buff-notif');
-            notif.innerHTML = text; 
-            notif.style.color = color;
-            notif.style.textShadow = `0 0 10px ${color}`;
-            notif.style.opacity = 1;
-            setTimeout(() => notif.style.opacity = 0, 2000); 
+            notif.innerHTML = text; notif.style.color = color; notif.style.textShadow = `0 0 10px ${color}`;
+            notif.style.opacity = 1; setTimeout(() => notif.style.opacity = 0, 2000);
         }
 
         function checkLevelUp() {
             if (gameState.xp >= (gameState.lvl * 100)) {
-                gameState.xp -= (gameState.lvl * 100);
-                gameState.lvl++;
-                
-                gameState.weapons.forEach((w, index) => {
-                    if (index !== 3) { 
-                        w.mag += 2; 
-                        w.reload = Math.max(300, w.reload * 0.90); 
-                        w.ammo = w.mag; 
-                    }
-                });
-
-                gameState.hp = Math.min(100, gameState.hp + 50);
-                gameState.grenades++;
-                createExplosion(player.position, 0x00ff00, 30); 
-                
+                gameState.xp -= (gameState.lvl * 100); gameState.lvl++;
+                gameState.weapons.forEach((w, i) => { if (i !== 3) { w.mag += 2; w.reload = Math.max(300, w.reload * 0.90); w.ammo = w.mag; } });
+                gameState.hp = Math.min(100, gameState.hp + 50); gameState.grenades++;
+                createExplosion(player.position, 0x00ff00, 30);
                 showBuffNotification("SYSTEM UPGRADED<br>+MAG SIZE | -RELOAD TIME", "#0f0");
-                updateHUD();
             }
         }
 
         function startWaveBreak() {
-            gameState.waveBreak = true;
-            gameState.miniBossSpawnedThisWave = false; 
-            
+            gameState.waveBreak = true; gameState.miniBossSpawnedThisWave = false;
             let count = 5;
-            const msgEl = document.getElementById('wave-announcer');
-            msgEl.style.display = 'block';
-            
+            document.getElementById('wave-announcer').style.display = 'block';
+
             gameState.hp = Math.min(100, gameState.hp + 30);
-            gameState.weapons.forEach(w => { if(w.name !== "MINIGUN") w.ammo = w.mag; });
-            createExplosion(player.position, 0x00ffff, 30); 
+            gameState.weapons.forEach(w => { if (w.name !== "MINIGUN") w.ammo = w.mag; });
+            createExplosion(player.position, 0x00ffff, 30);
 
             gameState.minigunProgress++;
             if (gameState.minigunProgress >= 3) {
-                gameState.minigunCharges++;
-                gameState.minigunProgress = 0;
+                gameState.minigunCharges++; gameState.minigunProgress = 0;
                 showBuffNotification("MINIGUN CHARGE READY [PRESS 4]", "#0f0");
             }
-            updateHUD();
 
             const timer = setInterval(() => {
-                if(gameState.gameOver) { clearInterval(timer); return; }
-                
-                msgEl.innerHTML = `WAVE ${gameState.wave} CLEARED<br><span style="font-size: 30px;">NEXT IN ${count}...</span>`;
+                if (gameState.gameOver) { clearInterval(timer); return; }
+                document.getElementById('wave-announcer').innerHTML = `WAVE ${gameState.wave} CLEARED<br><span style="font-size: 30px;">NEXT IN ${count}...</span>`;
                 count--;
-                
                 if (count < 0) {
-                    clearInterval(timer);
-                    msgEl.style.display = 'none';
-                    
-                    gameState.wave++;
-                    gameState.waveSpawned = 0;
-                    gameState.waveBreak = false;
-                    
-                    if (gameState.wave === 10 && !gameState.bossDefeated) {
-                        gameState.waveQuota = 0; 
-                        spawnBoss();
-                    } else {
-                        gameState.waveQuota = gameState.wave * 15; 
-                    }
-                    updateHUD();
+                    clearInterval(timer); document.getElementById('wave-announcer').style.display = 'none';
+                    gameState.wave++; gameState.waveSpawned = 0; gameState.waveBreak = false;
+                    if (gameState.wave === 10 && !gameState.bossDefeated) { gameState.waveQuota = 0; spawnBoss(); }
+                    else { gameState.waveQuota = gameState.wave * 15; }
                 }
             }, 1000);
         }
@@ -292,114 +534,73 @@
             const baseDir = new THREE.Vector3().subVectors(targetPos, player.position).normalize();
 
             for (let i = 0; i < wep.pellets; i++) {
-                const isRailgun = wep.name === "RAILGUN";
-                const isMinigun = wep.name === "MINIGUN";
-                
-                let beamWidth = 0.15, beamLength = 2.5;
-                if (isRailgun) { beamWidth = 0.4; beamLength = 10.0; }
-                if (isMinigun) { beamWidth = 0.1; beamLength = 1.5; }
+                let bw = 0.15, bl = 2.5;
+                if (wep.name === "RAILGUN") { bw = 0.4; bl = 10.0; }
+                if (wep.name === "MINIGUN") { bw = 0.1; bl = 1.5; }
 
-                const geometry = new THREE.BoxGeometry(beamWidth, beamWidth, beamLength); 
-                const material = new THREE.MeshStandardMaterial({ color: wep.color, emissive: wep.color, emissiveIntensity: 2.0, wireframe: !isRailgun });
-                const bullet = new THREE.Mesh(geometry, material); 
+                const bullet = new THREE.Mesh(new THREE.BoxGeometry(bw, bw, bl), new THREE.MeshStandardMaterial({ color: wep.color, emissive: wep.color, emissiveIntensity: 2.0, wireframe: wep.name !== "RAILGUN" }));
                 bullet.position.copy(player.position);
 
                 const dir = baseDir.clone();
-                if (wep.spread > 0) {
-                    const angleOffset = isMinigun ? (Math.random() - 0.5) * wep.spread : (i - (wep.pellets - 1) / 2) * wep.spread;
-                    dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), angleOffset);
-                }
+                if (wep.spread > 0) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), wep.name === "MINIGUN" ? (Math.random() - 0.5) * wep.spread : (i - (wep.pellets - 1) / 2) * wep.spread);
 
-                bullet.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir); 
+                bullet.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
                 bullet.userData = { velocity: dir.multiplyScalar(wep.speed), dmg: wep.dmg, color: wep.color };
-                
-                if (isRailgun) bullet.add(new THREE.PointLight(wep.color, 1, 10));
+                if (wep.name === "RAILGUN") bullet.add(new THREE.PointLight(wep.color, 1, 10));
 
-                scene.add(bullet);
-                gameState.bullets.push(bullet);
+                scene.add(bullet); gameState.bullets.push(bullet);
             }
         }
 
         function triggerGrenade() {
             if (gameState.grenades <= 0 || gameState.gameOver) return;
             gameState.grenades--;
-            
-            gridHelper.material.color.copy(gridFlashColor); 
-            setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100); 
-            updateHUD();
+            gridHelper.material.color.copy(gridFlashColor); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100);
 
-            const blastMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9 });
-            const blast = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), blastMat);
-            blast.position.copy(player.position);
-            scene.add(blast);
+            const blast = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.9 }));
+            blast.position.copy(player.position); scene.add(blast);
 
-            const maxRadius = 15;
             let currentRadius = 1;
-
             const blastInterval = setInterval(() => {
                 if (gameState.gameOver) { clearInterval(blastInterval); return; }
-
-                currentRadius += 1.5;
-                blast.scale.set(currentRadius, currentRadius, currentRadius);
-                blast.material.opacity -= 0.1;
+                currentRadius += 1.5; blast.scale.set(currentRadius, currentRadius, currentRadius); blast.material.opacity -= 0.1;
 
                 for (let i = gameState.enemies.length - 1; i >= 0; i--) {
                     const e = gameState.enemies[i];
                     if (e && blast.position.distanceTo(e.position) <= currentRadius) {
-                        
                         if (e.userData.type === 'boss' || e.userData.type === 'miniboss') {
-                            e.userData.hp -= 30; 
+                            e.userData.hp -= 30;
                             createExplosion(e.position, e.userData.color, 10);
-                            gridHelper.material.color.setHex(e.userData.color);
-                            setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 80);
+                            gridHelper.material.color.setHex(e.userData.color); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 80);
 
                             if (e.userData.hp <= 0) {
                                 if (e.userData.type === 'boss') handleBossDeath(e, i);
                                 else {
-                                    createExplosion(e.position, e.userData.color, 25);
-                                    scene.remove(e.userData.wire); 
-                                    scene.remove(e);
-                                    gameState.enemies.splice(i, 1);
-                                    gameState.kills++;
-                                    gameState.xp += 300;
-                                    checkLevelUp();
-                                    updateHUD();
+                                    createExplosion(e.position, e.userData.color, 25); scene.remove(e.userData.wire); scene.remove(e);
+                                    gameState.enemies.splice(i, 1); gameState.kills++; gameState.xp += 300; checkLevelUp();
                                 }
                             }
                         } else {
-                            gameState.kills++;
-                            createExplosion(e.position, e.userData.color, 15);
-                            scene.remove(e);
-                            gameState.enemies.splice(i, 1);
+                            gameState.kills++; createExplosion(e.position, e.userData.color, 15); scene.remove(e); gameState.enemies.splice(i, 1);
                         }
                     }
                 }
-                if (currentRadius >= maxRadius) { clearInterval(blastInterval); scene.remove(blast); }
+                if (currentRadius >= 15) { clearInterval(blastInterval); scene.remove(blast); }
             }, 30);
         }
 
         function handleBossDeath(bossMesh, bossIndex) {
-            gameState.kills++;
-            gameState.xp += 1000;
-            checkLevelUp();
-            
-            createExplosion(bossMesh.position, bossMesh.userData.color, 50); 
-            scene.remove(bossMesh);
-            gameState.enemies.splice(bossIndex, 1);
+            gameState.kills++; gameState.xp += 1000; checkLevelUp();
+            createExplosion(bossMesh.position, bossMesh.userData.color, 50); scene.remove(bossMesh); gameState.enemies.splice(bossIndex, 1);
 
-            for (let f = 0; f < 3; f++) {
-                setTimeout(() => gridHelper.material.color.setHex(0xffffff), f * 100);
-                setTimeout(() => gridHelper.material.color.setHex(0xff00ff), f * 100 + 50);
-            }
+            for (let f = 0; f < 3; f++) { setTimeout(() => gridHelper.material.color.setHex(0xffffff), f * 100); setTimeout(() => gridHelper.material.color.setHex(0xff00ff), f * 100 + 50); }
             setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 350);
 
-            gameState.bossActive = false;
-            gameState.bossDefeated = true;
-            document.getElementById('boss-hud').style.display = 'none';
-
-            startWaveBreak(); 
+            gameState.bossActive = false; gameState.bossDefeated = true; document.getElementById('boss-hud').style.display = 'none';
+            startWaveBreak();
         }
 
+        // --- 4. ENTITY SPAWNING ---
         function spawnEnemy() {
             const angle = Math.random() * Math.PI * 2;
             let type = "normal", size = 1.4, color = 0xff0066, hp = 1, speedMult = 1;
@@ -407,390 +608,216 @@
             if (gameState.wave >= 2 && Math.random() < 0.25) { type = "brute"; size = 2.5; color = 0x880022; hp = 4; speedMult = 0.4; }
             if (gameState.wave >= 3 && Math.random() < 0.20) { type = "seeker"; size = 1.0; color = 0x00ffcc; hp = 1; speedMult = 2.0; }
 
-            const material = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.2, roughness: 0.5 });
-            const enemy = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), material);
-            
+            const enemy = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.2, roughness: 0.5 }));
             enemy.position.set(player.position.x + Math.cos(angle) * 30, 0, player.position.z + Math.sin(angle) * 30);
             enemy.userData = { hp, maxHp: hp, speedMult, type, size, color, originalColor: color };
-            enemy.castShadow = true; enemy.receiveShadow = true;
-            
-            scene.add(enemy);
-            gameState.enemies.push(enemy);
+            enemy.castShadow = true; enemy.receiveShadow = true; scene.add(enemy); gameState.enemies.push(enemy);
         }
 
         function spawnMiniBoss() {
-            const waveScale = Math.floor(gameState.wave / 2); 
-            const size = 2.0 + (waveScale * 0.3); 
-            const color = 0xff0000; 
-            
-            const coreGeo = new THREE.OctahedronGeometry(size, 0);
-            const coreMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 });
-            const boss = new THREE.Mesh(coreGeo, coreMat);
-            
-            const wireGeo = new THREE.OctahedronGeometry(size + 0.3, 0);
-            const wireMat = new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.8 });
-            const wire = new THREE.Mesh(wireGeo, wireMat);
-            boss.add(wire); 
-            
-            const angle = Math.random() * Math.PI * 2;
-            boss.position.set(player.position.x + Math.cos(angle) * 35, 2, player.position.z + Math.sin(angle) * 35);
-            
-            const hp = 150 + (waveScale * 100);
-            const fireRate = Math.max(800, 2500 - (waveScale * 200)); 
-            
-            boss.userData = { 
-                hp: hp, maxHp: hp, speedMult: 0.3, type: 'miniboss', size: size * 2, 
-                color: color, originalColor: color, lastShot: Date.now(), fireRate: fireRate, wire: wire 
-            };
-            
-            boss.castShadow = true;
-            boss.add(new THREE.PointLight(color, 2, 30));
+            const waveScale = Math.floor(gameState.wave / 2);
+            const size = 2.0 + (waveScale * 0.3); const color = 0xff0000;
 
-            scene.add(boss);
-            gameState.enemies.push(boss);
+            const boss = new THREE.Mesh(new THREE.OctahedronGeometry(size, 0), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 }));
+            const wire = new THREE.Mesh(new THREE.OctahedronGeometry(size + 0.3, 0), new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: 0.8 }));
+            boss.add(wire);
+
+            const angle = Math.random() * Math.PI * 2; boss.position.set(player.position.x + Math.cos(angle) * 35, 2, player.position.z + Math.sin(angle) * 35);
+
+            boss.userData = { hp: 150 + (waveScale * 100), maxHp: 150 + (waveScale * 100), speedMult: 0.3, type: 'miniboss', size: size * 2, color: color, originalColor: color, lastShot: Date.now(), fireRate: Math.max(800, 2500 - (waveScale * 200)), wire: wire };
+            boss.castShadow = true; boss.add(new THREE.PointLight(color, 2, 30)); scene.add(boss); gameState.enemies.push(boss);
             showBuffNotification(`CRITICAL WARNING: ARMED ENTITY DETECTED`, "#ff0000");
         }
 
         function spawnBoss() {
-            gameState.bossActive = true;
-            document.getElementById('boss-hud').style.display = 'block';
-
-            const size = 3.0; 
-            const color = 0xff00ff; 
-            
-            const geo = new THREE.TorusKnotGeometry(size, 1.0, 100, 16);
-            const material = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.8 });
-            const boss = new THREE.Mesh(geo, material);
-            
+            gameState.bossActive = true; document.getElementById('boss-hud').style.display = 'block';
+            const size = 3.0; const color = 0xff00ff;
+            const boss = new THREE.Mesh(new THREE.TorusKnotGeometry(size, 1.0, 100, 16), new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.8 }));
             boss.position.set(player.position.x, 2, player.position.z - 30);
-            boss.userData = { hp: 400, maxHp: 400, speedMult: 0.35, type: 'boss', size: size*2, color, originalColor: color };
-            
-            boss.castShadow = true;
-            boss.add(new THREE.PointLight(color, 2, 40));
-
-            scene.add(boss);
-            gameState.enemies.push(boss);
-            updateHUD(); 
+            boss.userData = { hp: 400, maxHp: 400, speedMult: 0.35, type: 'boss', size: size * 2, color, originalColor: color };
+            boss.castShadow = true; boss.add(new THREE.PointLight(color, 2, 40)); scene.add(boss); gameState.enemies.push(boss);
         }
 
         function spawnPowerup(pos) {
-            if (Math.random() > 0.1) return; 
-
-            const rand = Math.random();
-            let type = rand < 0.33 ? 'heal' : (rand < 0.66 ? 'ammo' : 'shield'); 
-            let color = type === 'heal' ? 0x00ff00 : (type === 'ammo' ? 0xffff00 : 0x00ffff); 
-            
-            const material = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.5, wireframe: true });
-            const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.5), material);
-            mesh.position.copy(pos);
-            mesh.position.y = 0.5; 
-            mesh.userData = { type, color };
-            
-            mesh.add(new THREE.PointLight(color, 1, 5));
-            scene.add(mesh);
-            gameState.powerups.push(mesh);
+            if (Math.random() > 0.1) return;
+            const rand = Math.random(); let type = rand < 0.33 ? 'heal' : (rand < 0.66 ? 'ammo' : 'shield');
+            let color = type === 'heal' ? 0x00ff00 : (type === 'ammo' ? 0xffff00 : 0x00ffff);
+            const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.5), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.5, wireframe: true }));
+            mesh.position.copy(pos); mesh.position.y = 0.5; mesh.userData = { type, color }; mesh.add(new THREE.PointLight(color, 1, 5));
+            scene.add(mesh); gameState.powerups.push(mesh);
         }
 
         function createExplosion(pos, colorHex, count = 10) {
             for (let i = 0; i < count; i++) {
-                const mat = new THREE.MeshStandardMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 1.5 });
-                const p = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), mat);
-                p.position.copy(pos);
-                p.userData.vel = new THREE.Vector3(Math.random() - 0.5, Math.random(), Math.random() - 0.5).multiplyScalar(0.4);
-                p.userData.life = 1.0;
-                scene.add(p);
-                gameState.particles.push(p);
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), new THREE.MeshStandardMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 1.5 }));
+                p.position.copy(pos); p.userData.vel = new THREE.Vector3(Math.random() - 0.5, Math.random(), Math.random() - 0.5).multiplyScalar(0.4); p.userData.life = 1.0;
+                scene.add(p); gameState.particles.push(p);
             }
         }
 
-        function startReload() {
-            gameState.isReloading = true;
-            gameState.reloadStart = Date.now();
-            document.getElementById('reload-container').style.display = "block";
-        }
+        // --- 5. INPUT HANDLING ---
+        function startReload() { gameState.isReloading = true; gameState.reloadStart = Date.now(); document.getElementById('reload-container').style.display = "block"; }
 
         function switchWeapon(index) {
             if (gameState.isReloading || index === gameState.activeWep) return;
-            
             if (index === 3) {
-                if (gameState.weapons[3].ammo > 0) {
-                    gameState.activeWep = 3; 
-                } else if (gameState.minigunCharges > 0) {
-                    gameState.minigunCharges--;
-                    gameState.weapons[3].ammo = 100; 
-                    gameState.activeWep = 3;
-                } else {
-                    showBuffNotification("NO MINIGUN CHARGES<br>CLEAR WAVES TO CHARGE", "#f00");
-                    return; 
-                }
-            } else {
-                gameState.activeWep = index;
-            }
-            
-            updateHUD();
+                if (gameState.weapons[3].ammo > 0) { gameState.activeWep = 3; }
+                else if (gameState.minigunCharges > 0) { gameState.minigunCharges--; gameState.weapons[3].ammo = 100; gameState.activeWep = 3; }
+                else { showBuffNotification("NO MINIGUN CHARGES<br>CLEAR WAVES TO CHARGE", "#f00"); return; }
+            } else { gameState.activeWep = index; }
             if (gameState.weapons[gameState.activeWep].ammo <= 0 && Date.now() > gameState.buffs.infiniteAmmo) startReload();
         }
 
         const keys = {};
         window.onkeydown = (e) => {
-            keys[e.code] = true;
-            const now = Date.now();
-            
+            keys[e.code] = true; const now = Date.now();
+
             if (!gameState.isReloading && !gameState.gameOver) {
-                if (e.code === 'Digit1') switchWeapon(0);
-                if (e.code === 'Digit2') switchWeapon(1);
-                if (e.code === 'Digit3') switchWeapon(2);
-                if (e.code === 'Digit4') switchWeapon(3); 
+                if (e.code === 'Digit1') switchWeapon(0); if (e.code === 'Digit2') switchWeapon(1);
+                if (e.code === 'Digit3') switchWeapon(2); if (e.code === 'Digit4') switchWeapon(3);
             }
+            if (e.code === 'KeyR' && !gameState.isReloading && gameState.activeWep !== 3 && gameState.weapons[gameState.activeWep].ammo < gameState.weapons[gameState.activeWep].mag && now > gameState.buffs.infiniteAmmo) startReload();
+            if (e.code === 'KeyG') triggerGrenade();
 
-            if (e.code === 'KeyR' && !gameState.isReloading && gameState.activeWep !== 3 && gameState.weapons[gameState.activeWep].ammo < gameState.weapons[gameState.activeWep].mag && now > gameState.buffs.infiniteAmmo) {
-                startReload();
+            // --- NEW: DASH ACTIVATION ---
+            if (e.code === 'Space' && !gameState.gameOver && now - gameState.lastDash >= gameState.dashCooldown) {
+                let dx = 0, dz = 0;
+                if (keys['KeyW']) dz -= 1; if (keys['KeyS']) dz += 1;
+                if (keys['KeyA']) dx -= 1; if (keys['KeyD']) dx += 1;
+                if (dx === 0 && dz === 0) dz = -1; // Default forward dash
+
+                let dir = new THREE.Vector3(dx, 0, dz).normalize();
+                gameState.dashVel.copy(dir).multiplyScalar(1.2); // Powerful dash speed
+                gameState.lastDash = now;
+                createExplosion(player.position, 0x00ff00, 20); // Green dash burst
             }
-
-            if (e.code === 'KeyG') triggerGrenade(); 
         };
         window.onkeyup = (e) => keys[e.code] = false;
 
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-        const intersectPoint = new THREE.Vector3();
+        const raycaster = new THREE.Raycaster(); const mouse = new THREE.Vector2();
+        const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); const intersectPoint = new THREE.Vector3();
+        let isPointerDown = false; let lastFireTime = 0;
 
-        let isPointerDown = false;
-        let lastFireTime = 0;
+        window.addEventListener('pointerdown', () => isPointerDown = true); window.addEventListener('pointerup', () => isPointerDown = false);
+        window.addEventListener('mousemove', (e) => { mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1; });
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); });
 
-        window.addEventListener('pointerdown', () => isPointerDown = true);
-        window.addEventListener('pointerup', () => isPointerDown = false);
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        });
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-        });
-
+        // --- 6. MAIN UPDATE LOOP ---
         function update() {
             if (gameState.gameOver) return;
             const now = Date.now();
 
-            if (keys['KeyW']) player.position.z -= 0.15;
-            if (keys['KeyS']) player.position.z += 0.15;
-            if (keys['KeyA']) player.position.x -= 0.15;
-            if (keys['KeyD']) player.position.x += 0.15;
+            // Player Movement & Dash
+            if (keys['KeyW']) player.position.z -= 0.15; if (keys['KeyS']) player.position.z += 0.15;
+            if (keys['KeyA']) player.position.x -= 0.15; if (keys['KeyD']) player.position.x += 0.15;
+
+            // Apply Dash Velocity & Friction
+            player.position.add(gameState.dashVel);
+            gameState.dashVel.multiplyScalar(0.85); // Dash friction slows it down quickly
+
+            // Check if currently dashing for invincibility (velocity magnitude check)
+            const isDashing = gameState.dashVel.lengthSq() > 0.1;
 
             if (isPointerDown) {
-                const wep = gameState.weapons[gameState.activeWep];
-                const fireDelay = wep.name === "MINIGUN" ? 80 : 250; 
-                
+                const wep = gameState.weapons[gameState.activeWep]; const fireDelay = wep.name === "MINIGUN" ? 80 : 250;
                 if (now - lastFireTime > fireDelay) {
                     if (!gameState.isReloading && (wep.ammo > 0 || now < gameState.buffs.infiniteAmmo)) {
                         raycaster.setFromCamera(mouse, camera);
                         if (raycaster.ray.intersectPlane(groundPlane, intersectPoint)) {
                             fireBullet(intersectPoint);
-                            
-                            if (now > gameState.buffs.infiniteAmmo) {
-                                wep.ammo--;
-                                if (wep.ammo <= 0) {
-                                    if (gameState.activeWep === 3) switchWeapon(0); 
-                                    else startReload();
-                                }
-                            }
-                            updateHUD();
-                            lastFireTime = now;
-                            if(wep.name !== "MINIGUN") isPointerDown = false; 
+                            if (now > gameState.buffs.infiniteAmmo) { wep.ammo--; if (wep.ammo <= 0) { if (gameState.activeWep === 3) switchWeapon(0); else startReload(); } }
+                            lastFireTime = now; if (wep.name !== "MINIGUN") isPointerDown = false;
                         }
                     }
                 }
             }
-
-            dust.rotation.y += 0.0005;
 
             const wep = gameState.weapons[gameState.activeWep];
             if (gameState.isReloading) {
                 const elapsed = now - gameState.reloadStart;
                 document.getElementById('reload-bar').style.width = `${(elapsed / wep.reload) * 100}%`;
-                const secLeft = ((wep.reload - elapsed) / 1000).toFixed(1);
-                document.getElementById('ammo-count').innerText = `RELOADING ${Math.max(0, secLeft)}s`;
-
-                if (elapsed >= wep.reload) {
-                    gameState.isReloading = false;
-                    wep.ammo = wep.mag;
-                    document.getElementById('reload-container').style.display = "none";
-                    updateHUD();
-                }
+                document.getElementById('ammo-count').innerText = `RELOADING ${Math.max(0, ((wep.reload - elapsed) / 1000)).toFixed(1)}s`;
+                if (elapsed >= wep.reload) { gameState.isReloading = false; wep.ammo = wep.mag; document.getElementById('reload-container').style.display = "none"; }
             }
 
-            gameState.particles.forEach((p, i) => {
-                p.position.add(p.userData.vel);
-                p.userData.life -= 0.05;
-                p.scale.multiplyScalar(0.9);
-                if (p.userData.life <= 0) { scene.remove(p); gameState.particles.splice(i, 1); }
-            });
+            gameState.particles.forEach((p, i) => { p.position.add(p.userData.vel); p.userData.life -= 0.05; p.scale.multiplyScalar(0.9); if (p.userData.life <= 0) { scene.remove(p); gameState.particles.splice(i, 1); } });
+            gameState.bullets.forEach((b, i) => { b.position.add(b.userData.velocity); if (b.position.distanceTo(player.position) > 100) { scene.remove(b); gameState.bullets.splice(i, 1); } });
 
-            gameState.bullets.forEach((b, i) => {
-                b.position.add(b.userData.velocity);
-                if (b.position.distanceTo(player.position) > 100) { scene.remove(b); gameState.bullets.splice(i, 1); }
-            });
-
+            // Enemy Bullets (Mini-Boss Lasers)
             gameState.enemyBullets.forEach((b, i) => {
                 b.position.add(b.userData.velocity);
-                
                 if (b.position.distanceTo(player.position) < 1.2) {
-                    if (now < gameState.buffs.shield) {
-                        gridHelper.material.color.setHex(0xffffff);
-                        setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 50);
+                    // DODGE / INVINCIBILITY CHECK
+                    if (now < gameState.buffs.shield || isDashing) {
+                        gridHelper.material.color.setHex(0xffffff); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 50);
                     } else {
                         gameState.hp -= b.userData.dmg;
-                        gridHelper.material.color.setHex(0xff0000); 
-                        setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100);
+                        gridHelper.material.color.setHex(0xff0000); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100);
                     }
-
-                    createExplosion(player.position, 0xff0000, 5);
-                    scene.remove(b);
-                    gameState.enemyBullets.splice(i, 1);
-                    updateHUD();
-
-                    if (gameState.hp <= 0 && !gameState.gameOver) {
-                        gameState.gameOver = true;
-                        document.getElementById('game-over').style.display = "block";
-                        document.getElementById('boss-hud').style.display = 'none'; 
-                        scene.remove(player);
-                        createExplosion(player.position, 0x00ffcc, 50);
-                    }
-                } else if (b.position.distanceTo(player.position) > 150) {
-                    scene.remove(b); gameState.enemyBullets.splice(i, 1);
-                }
+                    createExplosion(player.position, 0xff0000, 5); scene.remove(b); gameState.enemyBullets.splice(i, 1);
+                    if (gameState.hp <= 0 && !gameState.gameOver) { gameState.gameOver = true; document.getElementById('game-over').style.display = "block"; scene.remove(player); createExplosion(player.position, 0x00ffcc, 50); }
+                } else if (b.position.distanceTo(player.position) > 150) { scene.remove(b); gameState.enemyBullets.splice(i, 1); }
             });
 
             gameState.powerups.forEach((pu, i) => {
-                pu.rotation.y += 0.03; 
-                pu.position.y = 0.5 + Math.sin(now * 0.005) * 0.1; 
+                pu.rotation.y += 0.03; pu.position.y = 0.5 + Math.sin(now * 0.005) * 0.1;
                 const dist = player.position.distanceTo(pu.position);
-
-                if (dist < 6.0) pu.position.lerp(player.position, 0.1); 
-
+                if (dist < 6.0) pu.position.lerp(player.position, 0.1);
                 if (dist < 1.5) {
                     const type = pu.userData.type;
-                    if (type === 'heal') {
-                        gameState.hp = Math.min(100, gameState.hp + 20); 
-                        showBuffNotification("SYSTEM RECOVERY [HP+20]", pu.userData.color.toString(16).replace('0x', '#'));
-                    } else if (type === 'shield') {
-                        gameState.buffs.shield = now + 10000; 
-                        showBuffNotification("ENERGY SHIELD ACTIVE [10s]", pu.userData.color.toString(16).replace('0x', '#'));
-                    } else if (type === 'ammo') {
-                        gameState.buffs.infiniteAmmo = now + 10000; 
-                        if (gameState.isReloading) { 
-                            gameState.isReloading = false;
-                            document.getElementById('reload-container').style.display = "none";
-                        }
-                        showBuffNotification("OVERCLOCK ACTIVE [∞ AMMO 10s]", pu.userData.color.toString(16).replace('0x', '#'));
-                    }
-                    scene.remove(pu);
-                    gameState.powerups.splice(i, 1);
-                    updateHUD();
+                    if (type === 'heal') { gameState.hp = Math.min(100, gameState.hp + 20); showBuffNotification("SYSTEM RECOVERY [HP+20]", "#0f0"); }
+                    else if (type === 'shield') { gameState.buffs.shield = now + 10000; showBuffNotification("ENERGY SHIELD ACTIVE", "#0ff"); }
+                    else if (type === 'ammo') { gameState.buffs.infiniteAmmo = now + 10000; if (gameState.isReloading) { gameState.isReloading = false; document.getElementById('reload-container').style.display = "none"; } showBuffNotification("OVERCLOCK ACTIVE", "#ff0"); }
+                    scene.remove(pu); gameState.powerups.splice(i, 1);
                 }
             });
 
             gameState.enemies.forEach((e, ei) => {
                 const dir = new THREE.Vector3().subVectors(player.position, e.position).normalize();
-
-                let baseSpeed = 0.03 + (gameState.wave * 0.002);
-                if (gameState.bossActive) baseSpeed *= e.userData.speedMult; 
-
+                let baseSpeed = 0.03 + (gameState.wave * 0.002); if (gameState.bossActive) baseSpeed *= e.userData.speedMult;
                 e.position.add(dir.multiplyScalar(baseSpeed * e.userData.speedMult));
-                
-                if (e.userData.type === 'boss') {
-                    e.rotation.x += 0.02; e.rotation.y += 0.03;
-                } else if (e.userData.type === 'miniboss') {
-                    e.rotation.x += 0.01; e.rotation.y += 0.02;
-                    e.userData.wire.rotation.x -= 0.02; e.userData.wire.rotation.y -= 0.03;
 
+                if (e.userData.type === 'boss') { e.rotation.x += 0.02; e.rotation.y += 0.03; }
+                else if (e.userData.type === 'miniboss') {
+                    e.rotation.x += 0.01; e.rotation.y += 0.02; e.userData.wire.rotation.x -= 0.02; e.userData.wire.rotation.y -= 0.03;
                     if (now - e.userData.lastShot > e.userData.fireRate) {
-                        const bGeo = new THREE.BoxGeometry(0.3, 0.3, 2.0);
-                        const bMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 3.0 });
-                        const bossBullet = new THREE.Mesh(bGeo, bMat);
+                        const bossBullet = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 2.0), new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 3.0 }));
                         bossBullet.position.copy(e.position);
-                        bossBullet.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir); 
-                        bossBullet.userData = { velocity: dir.multiplyScalar(0.5), dmg: 10 + (gameState.wave * 2) };
-                        scene.add(bossBullet);
-                        gameState.enemyBullets.push(bossBullet);
-                        e.userData.lastShot = now;
+                        const bulletDir = new THREE.Vector3().subVectors(player.position, e.position).normalize();
+                        bossBullet.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), bulletDir);
+                        bossBullet.userData = { velocity: bulletDir.multiplyScalar(0.8), dmg: 10 + (gameState.wave * 2) };
+                        scene.add(bossBullet); gameState.enemyBullets.push(bossBullet); e.userData.lastShot = now;
                     }
-                } else {
-                    e.rotation.y += 0.05;
-                }
+                } else { e.rotation.y += 0.05; }
 
                 if (player.position.distanceTo(e.position) < (0.8 + e.userData.size / 2)) {
-                    
-                    if (now < gameState.buffs.shield) {
-                        createExplosion(e.position, 0x00ffff, 3); 
-                        gridHelper.material.color.setHex(0xffffff);
-                        setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 50);
+                    // DODGE / INVINCIBILITY CHECK
+                    if (now < gameState.buffs.shield || isDashing) {
+                        createExplosion(e.position, 0x00ffff, 3); gridHelper.material.color.setHex(0xffffff); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 50);
                     } else {
-                        gameState.hp -= (e.userData.type === "brute" ? 30 : 15);
-                        gridHelper.material.color.setHex(0xff0000); 
-                        setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100);
+                        gameState.hp -= (e.userData.type === "brute" ? 30 : 15); gridHelper.material.color.setHex(0xff0000); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 100);
                     }
-
-                    createExplosion(e.position, 0xffffff);
-                    if (e.userData.wire) scene.remove(e.userData.wire);
-                    scene.remove(e); gameState.enemies.splice(ei, 1);
-                    updateHUD();
-
-                    if (gameState.hp <= 0 && !gameState.gameOver) {
-                        gameState.gameOver = true;
-                        document.getElementById('game-over').style.display = "block";
-                        document.getElementById('boss-hud').style.display = 'none'; 
-                        scene.remove(player);
-                        createExplosion(player.position, 0x00ffcc, 50);
-                    }
+                    createExplosion(e.position, 0xffffff); if (e.userData.wire) scene.remove(e.userData.wire); scene.remove(e); gameState.enemies.splice(ei, 1);
+                    if (gameState.hp <= 0 && !gameState.gameOver) { gameState.gameOver = true; document.getElementById('game-over').style.display = "block"; scene.remove(player); createExplosion(player.position, 0x00ffcc, 50); }
                 }
 
                 gameState.bullets.forEach((b, bi) => {
                     if (b && e && b.position.distanceTo(e.position) < (0.2 + e.userData.size / 2)) {
-                        
-                        e.userData.hp -= b.userData.dmg;
-                        e.position.add(b.userData.velocity.clone().normalize().multiplyScalar(0.5)); 
-                        createExplosion(e.position, b.userData.color, 3);
-                        scene.remove(b); gameState.bullets.splice(bi, 1);
-
-                        if (e.userData.type === 'boss') {
-                            updateHUD(); 
-                            gridHelper.material.color.setHex(0xff00ff);
-                            setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 80);
-                        }
+                        e.userData.hp -= b.userData.dmg; e.position.add(b.userData.velocity.clone().normalize().multiplyScalar(0.5)); createExplosion(e.position, b.userData.color, 3); scene.remove(b); gameState.bullets.splice(bi, 1);
+                        if (e.userData.type === 'boss') { gridHelper.material.color.setHex(0xff00ff); setTimeout(() => gridHelper.material.color.copy(gridBaseColor), 80); }
 
                         if (e.userData.hp <= 0) {
-                            if (e.userData.type === 'boss') {
-                                handleBossDeath(e, ei); 
-                            } else {
-                                createExplosion(e.position, e.userData.color, 20);
-                                spawnPowerup(e.position); 
-                                
-                                if (e.userData.wire) scene.remove(e.userData.wire);
-                                scene.remove(e); gameState.enemies.splice(ei, 1);
-                                
-                                gameState.kills++;
-                                let xpReward = 30;
-                                if (e.userData.type === "brute") xpReward = 150;
-                                if (e.userData.type === "seeker") xpReward = 50;
-                                if (e.userData.type === "miniboss") xpReward = 400; 
-                                
-                                gameState.xp += xpReward;
-                                checkLevelUp();
-                                updateHUD();
+                            if (e.userData.type === 'boss') { handleBossDeath(e, ei); }
+                            else {
+                                createExplosion(e.position, e.userData.color, 20); spawnPowerup(e.position);
+                                if (e.userData.wire) scene.remove(e.userData.wire); scene.remove(e); gameState.enemies.splice(ei, 1);
+                                gameState.kills++; gameState.xp += (e.userData.type === "brute" ? 150 : e.userData.type === "seeker" ? 50 : e.userData.type === "miniboss" ? 400 : 30); checkLevelUp();
                             }
                         } else {
                             if (e.userData.type !== 'boss' && e.userData.type !== 'miniboss') {
                                 const damagePercent = 1 - (e.userData.hp / e.userData.maxHp);
-                                e.material.color.setHex(e.userData.originalColor);
-                                e.material.color.lerp(new THREE.Color(0xffffff), damagePercent);
-                                e.material.emissive.setHex(e.userData.originalColor);
-                                e.material.emissive.lerp(new THREE.Color(0xffffff), damagePercent);
+                                e.material.color.setHex(e.userData.originalColor).lerp(new THREE.Color(0xffffff), damagePercent);
+                                e.material.emissive.setHex(e.userData.originalColor).lerp(new THREE.Color(0xffffff), damagePercent);
                             }
                         }
                     }
@@ -798,37 +825,19 @@
             });
 
             if (!gameState.waveBreak && !gameState.bossActive) {
-                if (gameState.wave % 2 === 0 && gameState.wave !== 10 && !gameState.miniBossSpawnedThisWave) {
-                    spawnMiniBoss();
-                    gameState.miniBossSpawnedThisWave = true;
-                }
-
+                if (gameState.wave % 2 === 0 && gameState.wave !== 10 && !gameState.miniBossSpawnedThisWave) { spawnMiniBoss(); gameState.miniBossSpawnedThisWave = true; }
                 if (gameState.waveSpawned < gameState.waveQuota) {
-                    let spawnChance = 0.02 + (gameState.wave * 0.003);
-                    spawnChance = Math.min(spawnChance, 0.15); 
-                    
-                    if (Math.random() < spawnChance) {
-                        spawnEnemy();
-                        gameState.waveSpawned++;
-                        updateHUD(); 
-                    }
-                } else if (gameState.enemies.length === 0) {
-                    startWaveBreak();
-                }
+                    if (Math.random() < Math.min(0.02 + (gameState.wave * 0.003), 0.15)) { spawnEnemy(); gameState.waveSpawned++; }
+                } else if (gameState.enemies.length === 0) { startWaveBreak(); }
             }
 
-            camera.position.lerp(new THREE.Vector3(player.position.x, 15, player.position.z + 15), 0.1);
-            camera.lookAt(player.position);
+            camera.position.lerp(new THREE.Vector3(player.position.x, 15, player.position.z + 15), 0.1); camera.lookAt(player.position);
+            updateHUD(); // Constantly update timers and UI
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            update();
-            composer.render();
-        }
-
-        updateHUD();
+        function animate() { requestAnimationFrame(animate); update(); composer.render(); }
         animate();
     </script>
 </body>
+
 </html>
